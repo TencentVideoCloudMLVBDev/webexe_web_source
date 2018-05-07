@@ -1,0 +1,432 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <TITLE>腾讯视频云</TITLE>
+    <style>    
+        .joinButton {background: transparent;}
+        .joinButton:hover {color: green;text-decoration: underline;}
+        a:hover {cursor: pointer;}
+        .tc-member-list-container {margin-top: 10px; width: 100%; height: 210px; background-color: #eee;}
+
+    </style>
+    <link href="./assets/css/index.css" rel="stylesheet" >
+    <script src="./js/vue.js"></script>
+    <script src="./js/vue-router.js"></script>
+    <script src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./js/EXEStarter.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/WebListOpt.js" charset="utf-8"></script>
+  </head>
+  <body onunload="dounload();">
+    <div id="vue-app">
+        <router-view></router-view>                                                                                            
+    </div>
+    <script>
+        function dounload() {
+            WebListOpt.unload();
+        };
+
+        function getRandomName() {
+            var randomNames = ['曹操', '刘备', '李白', '诸葛亮', '赵子龙', '孙权', '张飞',
+                '黄忠', '庞统', '貂蝉', '吕布', '马超', '孟获', '周瑜', '黄盖', '吕蒙']
+            var index = Math.ceil(Math.random() * 100) % randomNames.length;
+            return randomNames[index];
+        }
+        function randomUserId() {
+            var userID = "userid_web_" + Date.now().toString();
+            return userID;
+        }
+
+        var currentUserName = getRandomName();
+
+        var hasReLoginRoom = true;
+
+        var WEBRoomType = {
+            WEBRoomType_Live: 0,
+            WEBRoomType_Double: 1,
+            WEBRoomType_Mult: 2,
+        }
+
+        //不同的WEB房间类型，需要改变ID和URL
+        var RoomTypeID = WEBRoomType.WEBRoomType_Double;
+        var RoomServerDomain = "https://room.qcloud.com/";
+        var UnOpenRoomTips = "待开始";
+        var OpenRoomTips = "已开始";
+
+
+        var RoomList = {
+            template: '\
+          <div class="edu-index-body">                                                                       \
+          <div class="edu-index-pop-ups" style="margin: 0 auto;">                                          \
+                <div class="edu-index-logo">                                                               \
+                    <img src="./assets/logo_cs.png" alt="">                                          \
+                </div>                                                                                     \
+                <!-- 创建房间 s -->                                                                        \
+                <div class="edu-index-class-middle">                                                       \
+                    <div class="edu-index-class-middle" v-if="roomItems.length > 0">                     \
+                        <div class="edu-index-class-list">                                                 \
+                            <ul>                                                                           \
+                                <li v-for="(item, index) in roomItems">                                  \
+							        <span>{{ item.roomName }}</span>         \
+							        <button class="joinButton" v-on:click="join(index)">{{ item.statusTips }}</button>      \
+                                    <button class="joinButton" v-on:click="del(index)">关闭</button>      \
+						        </li>                                                                        \
+                            </ul>                                                                          \
+                        </div>                                                                             \
+			        </div>                                                                                 \
+                    <div class="edu-index-class-prompt" v-if="roomItems.length === 0">                   \
+                        <p>暂时没有房间，请先创建</p>                                                    \
+                    </div>                                                                                 \
+                </div>                                                                                     \
+                <!-- 创建房间 e -->                                                                        \
+                                                                                                           \
+                <!-- 按钮 s -->                                                                            \
+                <div class="edu-index-button">                                                             \
+                    <!-- 创建和加入房间 s -->                                                              \
+                    <div class="tc-15-rich-dialog-ft">                                                     \
+                        <div class="tc-15-rich-dialog-ft-btn-wrap">                                        \
+                            <button class="tc-15-btn" v-on:click="onCreateButtonClick">创建房间</button>   \
+                        </div>                                                                             \
+                    </div>                                                                                 \
+                    <!-- 创建和加入房间 e -->                                                              \
+                </div>                                                                                     \
+                <!-- 按钮 e -->                                                                            \
+            </div>                                                                                         \
+            <div id="toast_loading_exe" style="display:none;" class="toastload">                                                 \
+	            <div class="gif"></div>                                                                    \
+	            <div class="toastload_text">                                                                         \
+		            <p>正在启动客户端，请稍候....</p>                                                      \
+	            </div>                                                                                     \
+            </div>                                                                                         \
+	                                                                                                       \
+            <div id="toast_download_exe" style="display:none;" class="toastdown">                                                \
+	            <div class="toastdown_text">                                                                          \
+		            <p>检测未安装客户端，请【<a href="javascript:void(0)" v-on:click="onDownloadButtonClick()">下载</a>】安装</p>\
+	            </div>                                                                                      \
+            </div>                                                                                          \
+            </div>',
+
+            name: "RoomList",
+            data: function () {
+                return {
+                    loginInfo: {
+                        sdkAppID: '',
+                        accountType: '',
+                        userID: '',
+                        userName: '',
+                        userSig: ''
+                    },
+                    hasClass: false,
+                    roomItems: [],
+                };
+            },
+            mounted: function () {
+                this.loginInfo.userName = currentUserName;
+                if (hasReLoginRoom == false) {
+                    this.updateRoomList();
+                    return;
+                }
+                this.initLoginInfo();
+            },
+            methods: {
+                join: function (idx) {
+                    var room = this.roomItems[idx];
+                    if (room.bOpen == true) {
+                        alert("[" + room.roomName + "]" + "房间已经开启");
+                        return;
+                    }
+
+                    var index = idx;
+                    if (/*room.pushers.length >= 5*/0) {
+                        alert(room.roomName + "房间已经满人，请加入其他房间");
+                        updateRoomList();
+                        return;
+                    }
+                    console.log("跳转加入", JSON.stringify(room))
+                    var self = this;
+                    getSDKLoginInfo({
+                        data: {
+                            userID: randomUserId(),
+                            roomServerDomain: RoomServerDomain,
+                            method: "GET",
+                            time: 24 * 60 * 60 * 7
+                        },
+                        success: function (res) {
+                            if (res.status && res.status === 200) {
+                                var info = res.data;
+                                //console.log('loginInfo: ', JSON.stringify(info))
+                                WebListOpt.initRoom({
+                                    data: {
+                                        userID: info.userID,
+                                        userName: self.loginInfo.userName,
+                                        sdkAppID: info.sdkAppID,
+                                        accType: info.accType,
+                                        userSig: info.userSig,
+                                        roomType: RoomTypeID,
+                                        roomServerDoMain: RoomServerDomain,
+                                    },
+                                });
+                                hasReLoginRoom = false;
+                                console.log('getSDKLoginInfo 成功获取userID=', info.userID);
+                                WebListOpt.setListener({
+                                    onRecvCmd: function (roomID, cmd) { },
+                                    onRoomClose: function (ret) {
+                                        //to do 必须把上层的房间关闭。
+                                        alert("房间:[" + ret.data.roomName + "]已被异常关闭【errMsg:" + ret.data.msg + "】");
+                                        var index = -1;
+                                        for (var i = 0; i < self.roomItems.length; i++) {
+                                            if (self.roomItems[i].roomID == ret.data.roomID) {
+                                                index = i;
+                                                break;
+                                            }
+                                        }
+                                        if (index != -1) {
+                                            self.del(index);
+                                        }
+
+                                    },
+                                });
+                                document.getElementById('toast_loading_exe').style.display = 'none';
+                                document.getElementById('toast_download_exe').style.display = 'none';
+                                WebListOpt.enterRoom({
+                                    data: {
+                                        roomID: room.roomID,
+                                        roomName: room.roomName,
+                                        roomType: room.roomType,
+                                        roomCreator: room.creator,
+                                        roomTitle: "客服房间Demo体验",
+                                        roomAction: EXEStarter.RoomAction.CreateRoom
+                                    },
+                                    success: function () {
+                                        console.log("roomlist:进入房间成功");
+
+                                        document.getElementById('toast_loading_exe').style.display = 'none';
+                                        document.getElementById('toast_download_exe').style.display = 'none';
+                                        self.updateRoomList();
+                                    },
+                                    fail: function (ret) {
+                                        //当ret == -1，EXEStarter未检测到本地安装EXE，需要手动安装
+                                        if (ret.errCode == -1) {
+                                            console.log("courselist:进入房间 timeout!");
+                                            document.getElementById('toast_loading_exe').style.display = 'none';
+                                            document.getElementById('toast_download_exe').style.display = 'block';
+                                        }
+                                        else {
+                                            console.log("roomlist:进入房间失败!");
+                                            document.getElementById('toast_loading_exe').style.display = 'none';
+                                            document.getElementById('toast_download_exe').style.display = 'none';
+                                            alert("进入房间失败:" + ret.errMsg);
+                                        }
+                                    },
+                                });
+                                document.getElementById('toast_loading_exe').style.display = 'block';
+                            } else {
+                                console.log('getSDKLoginInfo 获取登录信息失败')
+                            }
+                        },
+                        fail: function (res) {
+                            console.log('getSDKLoginInfo 获取登录信息失败： ', JSON.stringify(res))
+                        }
+                    })
+                },
+                del: function (idx) {
+                    var room = this.roomItems[idx];
+                    console.log("删除房间", JSON.stringify(room))
+                    var self = this;
+                    if (room.bOpen == true) {
+                        WebListOpt.setListener({});
+                    }
+                    WebListOpt.exitRoom({
+                        data: {
+                            roomID: room.roomID,
+                            roomType: room.roomType,
+                        },
+                        success: function (res) {
+                            console.log("删除房间成功!");
+                            self.updateRoomList();
+                        },
+                        fail: function () {
+                            alert("删除房间失败");
+                        }
+                    });
+                },
+                onCreateButtonClick: function () {
+                    var self = this;
+                    console.log('onCreateButtonClick: self.loginInfo.userName = ', currentUserName)
+                    this.$router.push({ path: 'create', query: { name: currentUserName } })
+                },
+                onDownloadButtonClick: function () {
+                    window.open(EXEStarter.EXEUrl);
+                    document.getElementById('toast_loading_exe').style.display = 'none';
+                    document.getElementById('toast_download_exe').style.display = 'none';
+                },
+                updateRoomList: function () {
+                    var self = this;
+                    self.roomItems = [];
+                    WebListOpt.getRoomList({
+                        data: {
+                            index: 0,
+                            count: 10,
+                        },
+                        success: function (res) {
+                            var rooms = res.data.data.list
+                            if (rooms) {
+                                rooms.forEach(function (room) {
+
+                                    var roomInfo = {
+                                        roomID: room.roomID,	// 用户ID
+                                        roomName: room.roomInfo,		   // 用户昵称
+                                        creator: room.roomCreator,
+                                        bOpen: room.status, //是否已经开课
+                                        statusTips: room.status == 1 ? OpenRoomTips : UnOpenRoomTips,
+                                        roomType: RoomTypeID,
+                                    }
+
+                                    self.roomItems.push(roomInfo);
+                                });
+
+                                console.log('roomItems: ', JSON.stringify(self.roomItems))
+                            }
+                        },
+                        fail: function (res) {
+                            console.warn('获取房间列表失败', JSON.stringify(res))
+                        }
+                    })
+                },
+                initLoginInfo: function () {
+                    var self = this;
+                    getSDKLoginInfo({
+                        data: {
+                            userID: randomUserId(),
+                            roomServerDomain: RoomServerDomain,
+                            method: "GET",
+                            time: 24 * 60 * 60 * 7
+                        },
+                        success: function (res) {
+                            if (res.status && res.status === 200) {
+                                var info = res.data;
+                                //console.log('loginInfo: ', JSON.stringify(info))  
+                                WebListOpt.initRoom({
+                                    data: {
+                                        userID: info.userID,
+                                        userName: self.loginInfo.userName,
+                                        sdkAppID: info.sdkAppID,
+                                        accType: info.accountType,
+                                        userSig: info.userSig,
+                                        roomType: RoomTypeID,
+                                        roomServerDoMain: RoomServerDomain,
+                                    },
+                                });
+                                hasReLoginRoom = false;
+                                console.log('getSDKLoginInfo 登录成功, userID=', info.userID);
+                                self.updateRoomList();
+                            } else {
+                                alert('获取登录信息失败')
+                            }
+                        },
+                        fail: function (res) {
+                            console.log('获取登录信息失败： ', JSON.stringify(res))
+                        }
+                    })
+                }
+            },
+        };
+
+
+        var CreateRoom = {
+            template: '\
+            <div class="edu-index-body">                                                                     \
+            	<div class="edu-index-pop-ups" style="margin: 0 auto;">                                      \
+            		<div class="edu-index-logo">                                                             \
+            			<img  src="./assets/logo_cs.png" alt="" />                                     \
+            		</div>                                                                                   \
+            		<!-- 输入直播房间 s -->                                                                  \
+            		<div class="edu-index-class-input">                                                      \
+            			<ul>                                                                                 \
+            				<li><input type="text" placeholder="请输入房间名称" v-model="roomName" /></li> \
+            			</ul>	                                                                             \
+            		</div>                                                                                   \
+            		<!-- 输入房间名称 e -->                                                                  \
+                                                                                                             \
+            		<!-- 按钮 s -->                                                                          \
+            		<div class="edu-index-button">                                                           \
+            			<!-- 加入教室的按钮 s -->                                                            \
+            			<div class="tc-15-rich-dialog-ft">                                                   \
+            				<div class="tc-15-rich-dialog-ft-btn-wrap">                                      \
+            					<button v-on:click="onClickCreate" class="tc-15-btn">创建</button>           \
+            					<button v-on:click="onClickCancel" class="tc-15-btn weak">取消</button>      \
+            				</div>                                                                           \
+            			</div>                                                                               \
+            			<!-- 加入教室的按钮 e -->                                                            \
+            		</div>                                                                                   \
+            		<!-- 按钮 e -->                                                                          \
+            	</div>                                                                                       \
+            </div>',
+            name: 'CreateRoom',
+            data: function () {
+                return {
+                    roomName: null,
+                    nickName: null,
+                };
+            },
+            mounted: function () {
+                if (hasReLoginRoom == true) {
+                    this.onClickCancel();
+                }
+            },
+            methods: {
+                onClickCreate: function () {
+                    var self = this;
+                    console.log('create room: ', self.roomName, ' by ', self.nickName)
+                    if (!self.roomName || !self.nickName) {
+                        alert('课程名字和昵称不能为空!')
+                        return;
+                    } else {
+                        console.log(self.nickName + "创建房间:" + self.roomName);
+                        var name = this.nickName;
+                        var room = this.roomName;
+                        //此处创建房间
+                        //this.roomName = null;
+
+                        WebListOpt.createRoom({
+                            data: {
+                                roomInfo: room,
+                            },
+                            success: function (res) {
+                                console.log("创建房间成功, roomID = ", res.data.data.roomID);
+
+                                self.$router.push({ path: '/' });
+                            },
+                            fail: function () {
+                                alert("创建房间失败");
+                            }
+                        });
+                    }
+                },
+                onClickCancel: function () {
+                    this.$router.push({ path: '/' });
+                }
+            },
+            created: function () {
+                console.log('创建房间 created: query=', JSON.stringify(this.$route.query))
+                this.nickName = this.$route.query.name
+            },
+
+        };
+    </script>
+    <script type="text/javascript" charset="utf-8">
+      var router = new VueRouter({
+          routes: [
+              { path: '/', name: 'list', component: RoomList, },
+              { path: '/create', name: 'create', component: CreateRoom, }
+          ]
+      });
+      new Vue({
+          el: '#vue-app',
+          router: router,
+      });
+    </script>
+  </body>
+</html>

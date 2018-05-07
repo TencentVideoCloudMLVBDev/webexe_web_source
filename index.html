@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <TITLE>腾讯视频云</TITLE>
+      <script src="./js/vue.js"></script>
+      <script src="./js/vue-router.js"></script>
+</head>
+<body>
+    <div id="vue-app">
+        <router-view></router-view>
+    </div>
+    <script type="text/javascript"charset="utf-8">
+		var indexdemo = {
+		  template:'\
+		  <div id="index_container" style="z-index:1; background:#999; position:absolute; left:0px; top:0px; width:100%; height:100%;">                                                  \
+				<div style="width:100%; height:20; margin:0 auto; text-align:center; margin-top:120px; margin-bottom:100px">                                                           \
+					<h1 align="center" style="color:#000; font-size:50px">桌面解决方案</h1>                                                                                              \
+				</div>                                                                                                                                                                 \
+				<div class="div_item_container" style="margin: 0 auto; width:800px;">    <!--1060-->                                                                                   \
+					<div align="center" style="width:430px; height:273px; display: inline-block;">                                                                                     \
+						<img src="./assets/customservice.png" onClick="javascript:window.open(\'./double.html\')" /> 													\
+						<br /><br/><br/>                                                                                                                                               \
+						<h2 style="color:#000; cursor:pointer" onClick="javascript:window.open(\'./double.html\')"><u>在线客服</u></h2>                                \
+					</div>                                                                                                                                                             \
+					<div align="center" style="width:320px; height:273px; display: inline-block;">                                                                                     \
+						<img src="./assets/education.png" onClick="javascript:window.open(\'./liveroom.html \')"/>  												  \
+						<br/><br/><br/>                                                                                                                                                \
+						<h2 style="color:#000; cursor:pointer" onClick="javascript:window.open(\'./liveroom.html \')"><u>互动课堂</u></h2>                               \
+					</div>                                                                                                                                                             \
+				</div>\
+			</div>'
+		};
+
+		var router = new VueRouter({
+		  routes:[
+			  {
+				  path:'/',
+				  name: 'indexdemo',
+				  component:indexdemo
+			  },
+		  ]
+		});
+
+		var app = new Vue({
+		  el: '#vue-app',
+		  router: router,
+		})
+
+	</script>
+</body>
+</html>

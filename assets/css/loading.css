@@ -1,0 +1,57 @@
+/*  模态框样式 */
+.toastload{
+      width: 330px;
+      height: 55px;
+      background:transparent;
+      background:rgba(255,255,255,0.9);
+      border-radius:8px;
+      position: fixed;
+      margin:auto;left:0; right:0; top:0;
+	  margin-top: 12px;
+      z-index: 1;
+    }
+
+/* 动图样式 */
+.toastload .gif {
+    height: 37px;
+    width: 37px;
+    background: url('../loader.gif');
+	margin-left: 15px;
+	margin-top: 8px;
+    z-index: 2;
+	float:left;
+}
+
+/* 动图样式 */
+.toastload_text {
+    height: 30px;
+    width: 280px;
+	margin-left: 60px;
+	margin-top: 12px;
+    z-index: 3;
+	color: #000000;
+	font-size: 20px
+}
+
+
+.toastdown{
+      width: 350px;
+      height: 55px;
+      background:transparent;
+      background:rgba(255,255,255,0.9);
+      border-radius:8px;
+      position: fixed;
+      margin:auto;left:0; right:0;
+      z-index: 1;
+	  margin-top: 12px;
+    }
+/* 动图样式 */
+.toastdown_text {
+    height: 30px;
+    width: 320px;
+	margin-left: 15px;
+	margin-top: 12px;
+    z-index: 3;
+	color: #000000;
+	font-size: 20px
+}
