@@ -296,12 +296,17 @@ EXEStarter = (function () {
                             }
                         }
                         else if (cmd.event == "roomTextMsg" && port == room.httpPort) {
-                            console.log("[" + room.httpPort + "]" + "leaveRoom cmd");
+                            console.log("[" + room.httpPort + "]" + "roomTextMsg");
                             event.onRecvRoomIMMsg && event.onRecvRoomIMMsg(room.roomID, cmd);
+							
+							var str = JSON.stringify(cmd);
+							console.log(str);
                         }
                         else if (cmd.event == "menberChange" && port == room.httpPort) {
                             console.log("[" + room.httpPort + "]" + "menberChange");
                             event.onMemberChange && event.onMemberChange(room.roomID, cmd.list);
+							var str = JSON.stringify(cmd.list);
+							console.log(str);
                         }
                         else if (cmd.event == "sdkEventCallback" && port == room.httpPort) {
                             console.log("[" + room.httpPort + "]" + "sdkEventCallback");
