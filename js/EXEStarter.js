@@ -194,8 +194,8 @@ EXEStarter = (function () {
         custom.screenShare = (object.custom && object.custom.screenShare) || true;
         custom.record = (object.custom && object.custom.record) || false;
         custom.exeUrl = (object.custom && object.custom.exeUrl) || EXEUrl;
-        custom.ip = (object.custom && object.custom.ip) || "";
-        custom.port = (object.custom && object.custom.port) || 0;
+        custom.ip = (object.custom && object.custom.proxy_ip) || "";
+        custom.port = (object.custom && object.custom.proxy_port) || 0;
 
         //在此处拉起为协议：
         var params = swapToJsonStr(roomInfo);
@@ -302,8 +302,8 @@ EXEStarter = (function () {
 							var str = JSON.stringify(cmd);
 							console.log(str);
                         }
-                        else if (cmd.event == "menberChange" && port == room.httpPort) {
-                            console.log("[" + room.httpPort + "]" + "menberChange");
+                        else if (cmd.event == "memberChange" && port == room.httpPort) {
+                            console.log("[" + room.httpPort + "]" + "memberChange");
                             event.onMemberChange && event.onMemberChange(room.roomID, cmd.list);
 							var str = JSON.stringify(cmd.list);
 							console.log(str);
