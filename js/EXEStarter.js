@@ -141,7 +141,7 @@ EXEStarter = (function () {
         port: 0,
     };
     //exe房间列表
-    var arrExeRoom = [];
+    var arrExeRoom = []; var bSetChannelListener = false;
     // 回调事件
     var event = {
         onRoomClose: function () { },
@@ -156,6 +156,9 @@ EXEStarter = (function () {
             object.fail && object.fail(-9999, "init参数错误");
             return;
         }
+        if (bSetChannelListener == false)
+            setChannelListener(true);
+
         accountInfo.userID = object.userdata.userID;
         accountInfo.userSig = object.userdata.userSig;
         accountInfo.sdkAppID = object.userdata.sdkAppID;
@@ -249,6 +252,7 @@ EXEStarter = (function () {
     }
 
     function setListener(object) {
+        
         console.log('-----setExeRoomListener------');
         if (!object) {
             console.error('setExeRoomListener参数错误', object);
@@ -256,10 +260,21 @@ EXEStarter = (function () {
         }
         event.onRecvData = object.onRecvData || function () { };
         event.onRoomClose = object.onRoomClose || function () { };
-        if (typeof(object.onRoomClose) == "undefined") {
-            ExeMsgChannel.setListener({});
+        if (typeof (object.onRoomClose) == "undefined") {
+            setChannelListener(false);
         }
         else {
+            if (bSetChannelListener == false)
+                setChannelListener(true);
+        }
+    }
+    function setChannelListener(bListener) {
+        if (bListener == false) {
+            ExeMsgChannel.setListener({});
+            bSetChannelListener = false;
+        }
+        else {
+            bSetChannelListener = true;
             ExeMsgChannel.setListener({
                 onRecvCmd: function (cmd, port) {
                     var room = null;
@@ -298,15 +313,15 @@ EXEStarter = (function () {
                         else if (cmd.event == "roomTextMsg" && port == room.httpPort) {
                             console.log("[" + room.httpPort + "]" + "roomTextMsg");
                             event.onRecvRoomIMMsg && event.onRecvRoomIMMsg(room.roomID, cmd);
-							
-							var str = JSON.stringify(cmd);
-							console.log(str);
+
+                            var str = JSON.stringify(cmd);
+                            console.log(str);
                         }
                         else if (cmd.event == "memberChange" && port == room.httpPort) {
                             console.log("[" + room.httpPort + "]" + "memberChange");
                             event.onMemberChange && event.onMemberChange(room.roomID, cmd.list);
-							var str = JSON.stringify(cmd.list);
-							console.log(str);
+                            var str = JSON.stringify(cmd.list);
+                            console.log(str);
                         }
                         else if (cmd.event == "sdkEventCallback" && port == room.httpPort) {
                             console.log("[" + room.httpPort + "]" + "sdkEventCallback");
