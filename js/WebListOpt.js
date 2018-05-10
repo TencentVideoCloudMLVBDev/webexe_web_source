@@ -239,7 +239,7 @@ WebListOpt = (function () {
                 roomID: object.data.roomID,
                 roomName: object.data.roomName,
                 roomTitle: object.data.roomTitle,
-                roomLogo: "http://liteavsdk-1252463788.cosgz.myqcloud.com/windows/Cpp/logo/liveroom_logo.png",
+                roomLogo: object.data.roomLogo,
                 type: styleType,
                 template: template,
             },

@@ -1,7 +1,7 @@
+
 /*
 * EXERoom.js 用来给web和本地exe进行通信的类库。
 */
-
 var EXEStarter = {
     /**
      * 以房间方式打开EXE应用进程:
@@ -533,19 +533,17 @@ ExeMsgChannel = (function () {
         if (object && object.data && object.data.cmdUrl)
         {
             console.log('sendCmd:' + object.data.cmdUrl);
-            $.ajax({
-                type: "GET",
-                cache: false,
-                url: object.data.cmdUrl,
-                data: { strCparent: $("#Equipment_ID").val() },
-                dataType: "jsonp"
-            })
-		    .done(function (ret) {
-		        console.log("sendCmd sucess");
-		    })
-		    .fail(function (res) {
-		        console.log("sendCmd failed");
-		    })
+            ajaxQuery({
+                url: object.data.cmdUrl, // 请求地址  
+                dataType: 'jsonp',  // 采用jsonp请求，
+                data: {},   // 传输数据
+                success: function (res) {   // 请求成功的回调函数  
+                    console.log("sendCmd sucess");
+                },
+                error: function (error) {
+                    console.log("sendCmd failed");
+                }
+            });
         }
     };
 
@@ -598,46 +596,93 @@ ExeMsgChannel = (function () {
         arrConnects[i].nDisConnectCnt++;
         if (arrConnects[i].nSendCnt % 30 == 0)
             console.log("[" + arrConnects[i].httpPort + "]" + "jsonpRequest nSendCnt:" + arrConnects[i].nSendCnt + ", nRecvCnt:" + arrConnects[i].nRecvCnt);
+        var localHttpDomain = arrConnects[i].localHttpDomain;
+        ajaxQuery({
+            url: localHttpDomain,
+            dataType: 'jsonp',
+            data: { },
+            success: function (ret) {
+                if (ret && ret.port && ret.port != 0) {
+                    var idx = -1;
+                    for (var j = 0; j < arrConnects.length; j++) {
+                        if (arrConnects[j].httpPort == ret.port) {
+                            idx = j;
+                            break;
+                        }
+                    }
+                    if (idx == -1) { return; }
 
-        $.ajax({
-            type: "GET",
-            cache: false,
-            url: arrConnects[i].localHttpDomain,
-            data: { strCparent: $("#Equipment_ID").val() },
-            dataType: "jsonp"
-        })
-		.done(function (ret) {
-		    if (ret && ret.port && ret.port != 0) {
-		        var idx = -1;
-		        for (var j = 0; j < arrConnects.length; j++) {
-		            if (arrConnects[j].httpPort == ret.port) {
-		                idx = j;
-		                break;
-		            }
-		        }
-		        if (idx == -1) { return; }
+                    arrConnects[idx].nRecvCnt++;
+                    arrConnects[idx].nDisConnectCnt = 0;
 
-		        arrConnects[idx].nRecvCnt++;
-		        arrConnects[idx].nDisConnectCnt = 0;
+                    if (arrConnects[idx].bConnecting) {
+                        arrConnects[idx].bConnecting = false;
+                        event.onConnectStatus & event.onConnectStatus({ code: 0, port: ret.port, msg: 'http通道联通成功!' });
+                    }
 
-		        if (arrConnects[idx].bConnecting) {
-		            arrConnects[idx].bConnecting = false;
-		            event.onConnectStatus & event.onConnectStatus({ code: 0, port: ret.port, msg: 'http通道联通成功!' });
-		        }
-
-		        if (ret.code == 0 && ret.data != null) {
-		            for (var i = 0; i < ret.data.length; i++) {
-		                event.onRecvCmd & event.onRecvCmd(ret.data[i], ret.port);
-		            }
-		        }
-		    }
-		})
-		.fail(function (res) {
-		    console.log("failed");
-		    console.log(res);
-		})
+                    if (ret.code == 0 && ret.data != null) {
+                        for (var i = 0; i < ret.data.length; i++) {
+                            event.onRecvCmd & event.onRecvCmd(ret.data[i], ret.port);
+                        }
+                    }
+                }
+            },
+            error: function (ret) {
+                console.log("failed");
+                console.log(ret);
+            }
+        });
     }
 
+    /***********************************************************************************
+    * jsonp 原生通用函数
+    ************************************************************************************/
+    var jsonpRequestCnt = 0;
+    function ajaxQuery(params) {
+        params = params || {};
+        params.data = params.data || {};
+        var json;
+        if (params.dataType && params.dataType == 'jsonp') {
+            json = jsonp(params);
+        }
+        else {
+            params.error && params.error({
+                message: '参数异常',
+            });
+        }
+        // jsonp请求     
+        function jsonp(params) {
+            //创建script标签并加入到页面中
+            jsonpRequestCnt++;
+            var callbackName = 'jsonp_callback_' + jsonpRequestCnt.toString();
+            var head = document.getElementsByTagName('head')[0];
+            // 设置传递给后台的回调参数名 
+            jsonpRequestCnt++;
+            params.data['callback'] = callbackName;
+            var data = formatParamsToUrl(params.data);
+            var script = document.createElement('script');
+            head.appendChild(script);
+            //创建jsonp回调函数     
+            window[callbackName] = function (json) {
+                head.removeChild(script);
+                clearTimeout(script.timer);
+                window[callbackName] = null;
+                params.success && params.success(json);
+            };
+            //发送请求     
+            script.src = params.url + '?' + data;
+            //为了得知此次请求是否成功，设置超时处理     
+            if (params.time) {
+                script.timer = setTimeout(function () {
+                    window[callbackName] = null;
+                    head.removeChild(script);
+                    params.error && params.error({
+                        message: '超时'
+                    });
+                }, time);
+            }
+        };
+    }
     return {
         startConnect: startConnect,
         stopConnect: stopConnect,
@@ -667,7 +712,6 @@ function getSDKLoginInfo(params) {
         fail: params.fail
     });
 }
-
 
 /***********************************************************************************
 * http请求通用代码
@@ -751,7 +795,7 @@ function formatParamsToUrl(data) {
     for (var name in data) {
         arr.push(encodeURIComponent(name) + "=" + encodeURIComponent(data[name]));
     }
-    //arr.push(("v=" + Math.random()).replace(".", ""));
+    arr.push(("v=" + Math.random()).replace(".", ""));
     return arr.join("&");
 }
 

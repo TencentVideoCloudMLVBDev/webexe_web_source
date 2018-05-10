@@ -15,7 +15,6 @@
     <link href="./assets/css/index.css" rel="stylesheet" >
     <script src="./js/vue.js"></script>
     <script src="./js/vue-router.js"></script>
-    <script src="./js/jquery.min.js"></script>
     <script type="text/javascript" src="./js/EXEStarter.js" charset="utf-8"></script>
     <script type="text/javascript" src="./js/WebListOpt.js" charset="utf-8"></script>
   </head>
@@ -180,7 +179,7 @@
                                     onRecvCmd: function (roomID, cmd) { },
                                     onRoomClose: function (ret) {
                                         //to do 必须把上层的房间关闭。
-                                        alert("房间:[" + ret.data.roomName + "]已被异常关闭【errMsg:" + ret.data.msg + "】");
+                                        alert("房间:[" + ret.data.roomName + "]已关闭【errMsg:" + ret.data.msg + "】");
                                         var index = -1;
                                         for (var i = 0; i < self.courseItems.length; i++) {
                                             if (self.courseItems[i].courseID == ret.data.roomID) {
@@ -203,7 +202,8 @@
                                         roomType: room.roomType,
                                         roomCreator: room.creator,
                                         roomTitle: "互动课程Demo体验",
-                                        roomAction: EXEStarter.RoomAction.CreateRoom
+                                        roomAction: EXEStarter.RoomAction.CreateRoom,
+                                        roomLogo: "http://liteavsdk-1252463788.cosgz.myqcloud.com/windows/Cpp/logo/liveroom_logo.png",
                                     },
                                     success: function () {
                                         console.log("courselist:进入房间成功");
