@@ -5,7 +5,7 @@
 - **网页（Web）**：承载您原有的业务系统和业务逻辑，比如订单系统，CRM系统等各种电子流系统。
 - **桌面程序（EXE）**：类似PC版微信这样的应用程序，能够被您的网页直接唤起。具有性能优异，稳定性好能特点，能实现一些浏览器能力范围之外的功能。
 
-![](https://main.qcloudimg.com/raw/30a729f3fc5825c107a342a53ad7b938.png)
+![](https://main.qcloudimg.com/raw/325417360f2f75684d12682a3da9c4ff.png)
 
 ## 源码调试
 点击 [GitHub](https://github.com/TencentVideoCloudMLVBDev/webexe_web.git) 下载网页端源代码，用本地浏览器双击打开文件中的 index.html，就可以体验和调试 WebEXE 的相关功能。
