@@ -5,7 +5,7 @@
 - **网页（Web）**：承载您原有的业务系统和业务逻辑，比如订单系统，CRM系统等各种电子流系统。
 - **桌面程序（EXE）**：类似PC版微信这样的应用程序，能够被您的网页直接唤起。具有性能优异，稳定性好能特点，能实现一些浏览器能力范围之外的功能。
 
-![](https://main.qcloudimg.com/raw/325417360f2f75684d12682a3da9c4ff.png)
+![](https://github.com/TencentVideoCloudMLVBDev/webexe_web_source/raw/master/image/325417360f2f75684d12682a3da9c4ff.png)
 
 ## 源码调试
 点击 [GitHub](https://github.com/TencentVideoCloudMLVBDev/webexe_web.git) 下载网页端源代码，用本地浏览器双击打开文件中的 index.html，就可以体验和调试 WebEXE 的相关功能。
@@ -20,7 +20,7 @@
 
 ## 方案对接
 下面这幅图简单介绍了如何将 WebEXE 方案整合到您的现有的业务系统中：
-![](https://main.qcloudimg.com/raw/30281f823d059c5876968385ef97cbc6.png)
+![](https://github.com/TencentVideoCloudMLVBDev/webexe_web_source/raw/master/image/30281f823d059c5876968385ef97cbc6.png)
 
 ### step1: 搭建业务服务器
 业务服务器的作用主要是向PC端网页和微信小程序派发 roomid、userid、usersig 这些进行视频通话所必须的信息。其中roomid 和 userid 都可以由您的业务后台自由决定，只要确保不会出现 id重叠 就可以。usersig 的计算则需要参考 [DOC](https://cloud.tencent.com/document/product/454/14548)，我们在官网也提供了 java 和 php 版本的计算[源码](https://cloud.tencent.com/document/product/454/7873#Server)。
@@ -73,13 +73,13 @@ http://1252463788.vod2.myqcloud.com/e12fcc4dvodgzp1252463788/c490bab574473981559
 ## 内网穿透
 很多企业内部都有安全网关，禁止企业内部网络对互联网的访问，而腾讯视频云的解决方案都是依赖互联网接入的，所以要解决这个问题，就需要代理服务器的帮助：
 
-![](https://main.qcloudimg.com/raw/22550909ad08fbf301390a23220eb501.png)
+![](https://github.com/TencentVideoCloudMLVBDev/webexe_web_source/raw/master/image/22550909ad08fbf301390a23220eb501.png)
 
 ### Step1: 搭建音视频代理服务器（用于透传数据）
 
 采用NAT端口映射，就是将内网的机器映射到代理服务器的端口，代理服务器转发内网和腾讯云之间音视频数据包。下载Bash脚本<a href="http://liteavsdk-1252463788.cosgz.myqcloud.com/windows/WebEXE/Proxy/NATConfig.sh">NATConfig.sh</a>。打开文件和修改下图中IP的值，指定代理服务器接收网卡的IP，以及腾讯云推流和拉流服务器的地址，然后执行脚本，完成配置。
 
-![](https://main.qcloudimg.com/raw/c6e94f62213899f4b7a3e3c111e8cac5.png)
+![](https://github.com/TencentVideoCloudMLVBDev/webexe_web_source/raw/master/image/c6e94f62213899f4b7a3e3c111e8cac5.png)
 
 
 ### Step2: 搭建Socks5代理服务器（用于透传信令）
