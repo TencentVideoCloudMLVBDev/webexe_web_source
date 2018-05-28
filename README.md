@@ -1,4 +1,4 @@
-## 本版本EXEStarter.js CDN地址：
+## EXEStarter.js CDN地址：
 
 http://sqimg.qq.com/expert_qq/webexe/3.1.2.0/EXEStarter.js
 
