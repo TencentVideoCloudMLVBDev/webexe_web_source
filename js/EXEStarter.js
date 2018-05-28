@@ -436,7 +436,7 @@ LiveRoom = (function () {
                     serverDomain: "http://localhost:" + roomInfo.httpPort.toString() + "/query",
                     httpPort: roomInfo.httpPort,
                     fistTimeout: 14,
-                    disconnectTimeout: 6,
+                    disconnectTimeout: 4,
                 }
             });
         }
@@ -447,7 +447,7 @@ LiveRoom = (function () {
                     serverDomain: "http://localhost:" + roomInfo.httpPort.toString() + "/query",
                     httpPort: roomInfo.httpPort,
                     fistTimeout: 14,
-                    disconnectTimeout: 7,
+                    disconnectTimeout: 4,
                 }
             });
             if (bConnectExe == false) {                //先让http通道起来检测有没EXE实例了.
@@ -897,7 +897,7 @@ RtcRoom = (function () {
                     serverDomain: "http://localhost:" + roomInfo.httpPort.toString() + "/query",
                     httpPort: roomInfo.httpPort,
                     fistTimeout: 14,
-                    disconnectTimeout: 6,
+                    disconnectTimeout: 4,
                 }
             });
         }
@@ -908,7 +908,7 @@ RtcRoom = (function () {
                     serverDomain: "http://localhost:" + roomInfo.httpPort.toString() + "/query",
                     httpPort: roomInfo.httpPort,
                     fistTimeout: 14,
-                    disconnectTimeout: 6,
+                    disconnectTimeout: 4,
                 }
             });
             if (bConnectExe == false) {                //先让http通道起来检测有没EXE实例了.
