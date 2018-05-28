@@ -1,4 +1,4 @@
-## Demo体验
+## Demo体验(version:3.1.2.0)
 
 用任意浏览器打开 [体验地址](http://img.qcloud.com/open/qcloud/video/act/liteavWeb/avsolution/Index.html) 即可了解 WebEXE 方案，左侧的网页可以替换成您的Web页面，右侧的 TXCloudRoom.exe 用于实现视频通话等功能。
 
