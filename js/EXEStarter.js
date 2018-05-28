@@ -330,9 +330,18 @@ LiveRoom = (function () {
     };
 
     function startEXE(object) {
-        if (!object || !object.roomdata.serverDomain) {
+        if (!object) {
             console.error("liveroom startEXE参数错误");
-            object.fail && object.fail(-9999, "init参数错误");
+            object.fail && object.fail({ errCode: -9998, errMsg: "LiveRoom.startEXE object参数错误" });
+            return;
+        }
+
+        if (!object.userdata.userID || !object.userdata.userSig || !object.userdata.sdkAppID ||
+            !object.userdata.accType || !object.roomdata.serverDomain || !object.roomdata.roomID || 
+            !object.roomdata.roomAction) {
+            console.error("liveroom startEXE参数错误");
+            alert("LiveRoom.startEXE 参数错误")
+            object.fail && object.fail({ errCode: -9999, errMsg: "LiveRoom.startEXE object参数错误" });
             return;
         }
 
@@ -793,9 +802,19 @@ RtcRoom = (function () {
 
     function startEXE(object) {
         if (!object || !object.roomdata.serverDomain) {
-            console.error("liveroom startEXE参数错误");
-            object.fail && object.fail(-9999, "init参数错误");
+            console.error("RtcRoom startEXE参数错误");
+            object.fail && object.fail({ errCode: -9998, errMsg: "RtcRoom.startEXE object参数错误" });
             return;
+        }
+
+        if (!object.userdata.userID || !object.userdata.userSig || !object.userdata.sdkAppID ||
+            !object.userdata.accType || !object.roomdata.serverDomain || !object.roomdata.roomID ||
+            !object.roomdata.roomAction)
+        {
+            console.error("RtcRoom startEXE参数错误");
+            alert("RtcRoom.startEXE 参数错误")
+            object.fail && object.fail({ errCode: -9999, errMsg: "RtcRoom.startEXE object参数错误" });
+             return;
         }
 
         console.log("current-time:" + printLocalFormatTime());
@@ -1245,10 +1264,19 @@ PushPlay = (function () {
 
     function startEXE(object) {
         if (!object) {
-            console.error("startEXE参数错误");
-            object.fail && object.fail(-9999, "init参数错误");
+            console.error("PushPlay startEXE参数错误");
+            object.fail && object.fail({ errCode: -9998, errMsg: "PushPlay.startEXE object参数错误" });
             return;
         }
+
+        if (!object.data.pushURL || !object.data.playURL)
+        {
+             console.error("PushPlay startEXE参数错误");
+             alert("PushPlay.startEXE 参数错误")
+             object.fail && object.fail({ errCode: -9999, errMsg: "PushPlay.startEXE object参数错误" });
+             return;
+        }
+
         console.log("current-time:" + printLocalFormatTime());
         if (bSetChannelListener == false)
             setChannelListener(true);
