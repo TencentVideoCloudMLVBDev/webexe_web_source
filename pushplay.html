@@ -1,0 +1,126 @@
+<HTML>
+<HEAD>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+<TITLE>对象 PushPlay 测试页</TITLE>
+<style>    
+ .div-inline {display:inline}
+</style>
+    <script type="text/javascript" src="./js/EXEStarter.js" charset="utf-8"></script>
+</HEAD>
+<BODY onload="initSDK();" onunload="uninitSDK();">
+     <input type=submit value="createSession" onClick="createSession(document.getElementById('PusherUrlTextField').value, document.getElementById('PlayerUrlTextField').value);">
+     <input type=submit value="destroySession" onClick="destroySession();">
+     <input type=submit value="获取推流地址" onClick="getNewPushUrl();">
+     <input type=submit value="截图推流端" onClick="snapShotPusher();">
+     <input type=submit value="截图拉流端" onClick="snapShotPlayer();">
+     <br></br>
+     <input size="90" id="PusherUrlTextField" value=""> push_url
+     <br></br>
+     <input size="90" id="PlayerUrlTextField" value=""> play_url
+    <img id="testImg"></img>
+    <script>
+        function initSDK()
+        {
+            PushPlay.setListener({
+                onRecvEvent: function (cmd) {
+                    if (cmd.eventID == 1012)
+                    {
+                        var temp = cmd;
+                        if (temp.params[0].value == 0)
+                        {
+                            var path = temp.params[1].value;
+                            var tempPath = path;
+
+                            var element = document.getElementById('testImg');
+                            element.src = "data:image/jpeg;base64," + temp.params[2].value;
+                        }
+                    }
+                },
+            });
+
+            setTimeout(function () {
+                httpRequest({
+                    url: "https://lvb.qcloud.com/weapp/utils/get_test_pushurl",
+                    data: {},
+                    method: "GET",
+                    success: function (ret) {
+                        var urlPusher = ret.data.url_play_acc;
+                        var urlPlayer = urlPusher.replace(/livepush/g, "liveplay");
+                        document.getElementById('PusherUrlTextField').value = urlPusher;
+                        document.getElementById('PlayerUrlTextField').value = urlPlayer;
+                        createSession(document.getElementById('PusherUrlTextField').value, document.getElementById('PlayerUrlTextField').value);
+                    },
+                    fail: function (ret) {
+
+                    },
+                })
+            }, 500);
+        }
+        function uninitSDK()
+        {
+            PushPlay.unload();
+        }
+
+        function isRtmpUrl(strUrl) {
+            var temp = "rtmp";
+            return strUrl.indexOf(temp) >= 0;
+        }
+
+        function createSession(pushUrl, playUrl) {
+            if (pushUrl == "" || isRtmpUrl(pushUrl) == false) {
+                alert("请输入正确拉流url");
+                return;
+            }
+            if (playUrl == "" || isRtmpUrl(playUrl) == false) {
+                alert("请输入正确拉流url");
+                return;
+            }
+
+            PushPlay.startEXE({
+                data: {
+                    type: "CustomServiceLive",
+                    pushURL: pushUrl,
+                    playURL: playUrl,
+                    title: "CS模式Demo",
+                    logoUrl: "http://liteavsdk-1252463788.cosgz.myqcloud.com/windows/Cpp/logo/doubleroom_logo.png",
+                },
+                success: function (ret) {
+
+                },
+                fail: function (ret) {
+                    if (ret.errCode == -1) {
+                        alert("exe未安装");
+                    }
+                },
+            });
+        }
+        function destroySession() {
+            PushPlay.stopEXE();
+        }
+
+        function snapShotPlayer() {
+            PushPlay.videoSnapshot({ data: { userRole: "player" } });
+        }
+        function snapShotPusher() {
+            PushPlay.videoSnapshot({ data: { userRole: "pusher" } });
+        }
+
+        function getNewPushUrl() {
+            httpRequest({
+                url: "https://lvb.qcloud.com/weapp/utils/get_test_pushurl",
+                data: {},
+                method: "GET",
+                success: function (ret) {
+                    var urlPusher = ret.data.url_play_acc;
+                    var urlPlayer = urlPusher.replace(/livepush/g, "liveplay");
+                    document.getElementById('PusherUrlTextField').value = urlPusher;
+                    document.getElementById('PlayerUrlTextField').value = urlPlayer;
+                },
+                fail: function (ret) {
+
+                },
+            }) 
+        }
+    </script>
+</BODY>
+</HTML>

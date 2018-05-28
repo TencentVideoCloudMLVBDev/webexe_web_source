@@ -43,15 +43,10 @@
 
         var hasReLoginRoom = true;
 
-        var WEBRoomType = {
-            WEBRoomType_Live: 0,
-            WEBRoomType_Double: 1,
-            WEBRoomType_Mult: 2,
-        }
-
         //不同的WEB房间类型，需要改变ID和URL
-        var RoomTypeID = WEBRoomType.WEBRoomType_Live;
+        var RoomTypeID = WebListOpt.webexe_roomtype.DoubleRoom;
         var RoomServerDomain = "https://room.qcloud.com/";
+        var ListServerDoMain = " http://xzb.qcloud.com/roomlist/weapp/webexe_room/"
         var UnOpenRoomTips = "开课";
         var OpenRoomTips = "已开课";
 
@@ -154,7 +149,7 @@
                     getSDKLoginInfo({
                         data: {
                             userID: randomUserId(),
-                            roomServerDomain: RoomServerDomain,
+                            loginServerDoMain: ListServerDoMain + "get_login_info",
                             method: "GET",
                             time: 24 * 60 * 60 * 7
                         },
@@ -167,10 +162,11 @@
                                         userID: info.userID,
                                         userName: self.loginInfo.userName,
                                         sdkAppID: info.sdkAppID,
-                                        accType: info.accType,
+                                        accType: info.accountType,
                                         userSig: info.userSig,
                                         roomType: RoomTypeID,
                                         roomServerDoMain: RoomServerDomain,
+                                        listServerDoMain: ListServerDoMain
                                     },
                                 });
                                 hasReLoginRoom = false;
@@ -195,6 +191,7 @@
                                 });
                                 document.getElementById('toast_loading_exe').style.display = 'none';
                                 document.getElementById('toast_download_exe').style.display = 'none';
+                                document.getElementById('toast_loading_exe').style.display = 'block';
                                 WebListOpt.enterRoom({
                                     data: {
                                         roomID: room.courseID,
@@ -202,7 +199,7 @@
                                         roomType: room.roomType,
                                         roomCreator: room.creator,
                                         roomTitle: "互动课程Demo体验",
-                                        roomAction: EXEStarter.RoomAction.CreateRoom,
+                                        roomAction: EnumDef.RoomAction.CreateRoom,
                                         roomLogo: "http://liteavsdk-1252463788.cosgz.myqcloud.com/windows/Cpp/logo/liveroom_logo.png",
                                     },
                                     success: function () {
@@ -213,7 +210,7 @@
                                         self.updateCourseList();
                                     },
                                     fail: function (ret) {
-                                        //当ret == -1，EXEStarter未检测到本地安装EXE，需要手动安装
+                                        //当ret == -1，LiveRoom未检测到本地安装EXE，需要手动安装
                                         if (ret.errCode == -1) {
                                             console.log("courselist:进入房间 timeout!");
                                             document.getElementById('toast_loading_exe').style.display = 'none';
@@ -228,7 +225,6 @@
 
                                     },
                                 });
-                                document.getElementById('toast_loading_exe').style.display = 'block';
                             } else {
                                 console.log('getSDKLoginInfo 获取登录信息失败')
                             }
@@ -265,7 +261,7 @@
                     this.$router.push({ path: 'create', query: { name: currentUserName } })
                 },
                 onDownloadButtonClick: function () {
-                    window.open(EXEStarter.EXEUrl);
+                    window.open(EnumDef.EXEUrl);
                     document.getElementById('toast_loading_exe').style.display = 'none';
                     document.getElementById('toast_download_exe').style.display = 'none';
                 },
@@ -278,7 +274,7 @@
                             count: 10,
                         },
                         success: function (res) {
-                            var rooms = res.data.data.list
+                            var rooms = res.data.rooms
                             if (rooms) {
                                 rooms.forEach(function (room) {
 
@@ -306,7 +302,7 @@
                     getSDKLoginInfo({
                         data: {
                             userID: randomUserId(),
-                            roomServerDomain: RoomServerDomain,
+                            loginServerDoMain: ListServerDoMain + "get_login_info",
                             method: "GET",
                             time: 24 * 60 * 60 * 7
                         },
@@ -323,6 +319,7 @@
                                         userSig: info.userSig,
                                         roomType: RoomTypeID,
                                         roomServerDoMain: RoomServerDomain,
+                                        listServerDoMain: ListServerDoMain
                                     },
                                 });
                                 hasReLoginRoom = false;
@@ -402,7 +399,7 @@
                             },
                             success: function (res) {
                                 //self.courseId = res.roomID;
-                                console.log("创建房间成功, roomID = ", res.data.data.roomID);
+                                console.log("创建房间成功, roomID = ", res.data.roomID);
                                 self.$router.push({ path: '/' });
                             },
                             fail: function () {

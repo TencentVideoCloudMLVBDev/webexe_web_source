@@ -10,6 +10,7 @@ var WebListOpt = {
      *      sdkAppID      String    IM登录凭证
      *      accType       Int       账号集成类型
      *      userSig       String    IM签名
+     *      rr
      *  }
      * success       function  成功回调
      * fail          function  失败回调
@@ -108,6 +109,12 @@ WebListOpt = (function () {
         token: "",
     };
 
+    var webexe_roomtype = {
+        LiveRoom: "webexe_liveroom",
+        DoubleRoom: "webexe_doubleroom",
+        MultiRoom: "webexe_multiroom",
+    }
+
     // 回调事件
     var event = {
         onRecvData: function () { },		        // 收到命令
@@ -116,12 +123,15 @@ WebListOpt = (function () {
 
     var arrWebRoom = [];
 
-    var webListDomain = 'https://xzb.qcloud.com/';
+    var webListDomain = '';
     var roomServerDoMain = '';
-    var baseRoomType = 0;
+    var webExeRoomType = '';
+
+    
+    var EXEStartObj = null;
 
     function initRoom(object) {
-        if (!object || !object.data.roomServerDoMain) {
+        if (!object || !object.data.roomServerDoMain || !object.data.listServerDoMain) {
             console.error("init参数错误");
             object.fail && object.fail(-9999, "init参数错误");
             return;
@@ -132,8 +142,13 @@ WebListOpt = (function () {
         accountInfo.accountType = object.data.accType;
         accountInfo.userName = object.data.userName || accountInfo.userID;
         accountInfo.userAvatar = object.userAvatar || "123";
-        baseRoomType = object.data.roomType;
+        webExeRoomType = object.data.roomType;
         roomServerDoMain = object.data.roomServerDoMain;
+        webListDomain = object.data.listServerDoMain;
+        EXEStartObj = LiveRoom;
+        if (webExeRoomType != 0)
+            EXEStartObj = RtcRoom;
+            
     }
 
     function createRoom (object) {
@@ -143,12 +158,15 @@ WebListOpt = (function () {
             url: webListDomain + 'create_room',
             method: "POST",
             data: {
-                roomType: baseRoomType,
-                roomInfo: object.data.roomInfo,
+                userID: accountInfo.userID,
+                nickName: accountInfo.userName,
                 roomID: "",
+                roomInfo: object.data.roomInfo,
+                roomType: webExeRoomType,
+                needHeartBeat: false, // 是否需要心跳，默认值1-需要
             },
             success: function (ret) {
-                if (ret.data.code != 200) {
+                if (ret.data.code != 0) {
                     console.log('创建失败:', JSON.stringify(ret));
                     object.fail && object.fail({
                         errCode: ret.data.code,
@@ -156,7 +174,6 @@ WebListOpt = (function () {
                     });
                     return;
                 }
- 
                 object.success && object.success(ret);
             },
             fail: object.fail
@@ -172,7 +189,7 @@ WebListOpt = (function () {
         event.onRecvData = object.onRecvCmd || function () { };
         event.onRoomClose = object.onRoomClose || function () { };
         var self = this;
-        EXEStarter.setListener({
+        EXEStartObj.setListener({
             onRoomClose: function (ret) {
                 //to do 必须把上层的房间关闭。
                 event.onRoomClose && event.onRoomClose({
@@ -217,15 +234,11 @@ WebListOpt = (function () {
         arrWebRoom.push(roomInfo);
         var self = this;
        
-        var styleType = EXEStarter.StyleType.LiveRoom;
-        if(baseRoomType != 0)
-            styleType = EXEStarter.StyleType.RTCRoom;
-        var template = EXEStarter.Template.Template1V3;
+        var template = EnumDef.Template.Template1V3;
+        if (webExeRoomType == "webexe_doubleroom") //如果是doubleroom，采用1v1的模板
+            template = EnumDef.Template.Template1V1;
 
-        if(baseRoomType == 1) //如果是doubleroom，采用1v1的模板
-            template = EXEStarter.Template.Template1V1;
-
-        EXEStarter.createExeAsRoom({
+        EXEStartObj.startEXE({
             userdata: {
                 userID: accountInfo.userID,
                 userName: accountInfo.userName,
@@ -240,20 +253,26 @@ WebListOpt = (function () {
                 roomName: object.data.roomName,
                 roomTitle: object.data.roomTitle,
                 roomLogo: object.data.roomLogo,
-                type: styleType,
                 template: template,
             },
+            /*
+            custom:{
+                mixRecord: false,
+                screenRecord: EnumDef.ScreenRecordType.RecordScreenToServer,
+                cloudRecordUrl: 'rtmp://3891.livepush.myqcloud.com/live/3891_user_a824b8bd_36bb?bizid=3891&txSecret=f111e74675db7cc0d4f27493ec20c486&txTime=5B063649&record=mp4&record_interval=7200',
+            },*/
             success: function (ret) {
                 request({
                     url: webListDomain + 'enter_room',
                     method: "POST",
                     data: {
-                        roomType: baseRoomType,
+                        userID: accountInfo.userID,
+                        nickName: accountInfo.userName,
                         roomID: object.data.roomID,
                         status: 1,
                     },
                     success: function (ret) {
-                        if (ret.data.code != 200) {
+                        if (ret.data.code != 0) {
                             console.log('列表更新状态失败:', JSON.stringify(ret));
                         }
                         else {
@@ -280,7 +299,7 @@ WebListOpt = (function () {
 
     function exitRoom(object) {
         console.log('exitRoom-roomID:' + object.data.roomID);
-        EXEStarter.closeExeAsRoom({ data: { roomID: object.data.roomID, } });
+        EXEStartObj.stopEXE({ data: { roomID: object.data.roomID, } });
         var index = -1;
         for (var i = 0; i < arrWebRoom.length; i++) {
             if (arrWebRoom[i].roomID == object.data.roomID) {
@@ -293,17 +312,16 @@ WebListOpt = (function () {
             arrWebRoom.splice(index, 1);
         }
         if (arrWebRoom.length == 0)
-            EXEStarter.setListener({});
+            EXEStartObj.setListener({});
         request({
             url: webListDomain + 'delete_room',
             method: "POST",
             data: {
-                roomType: object.data.roomType,
                 roomID: object.data.roomID,
             },
 
             success: function (ret) {
-                if (ret.data.code != 200) {
+                if (ret.data.code != 0) {
                     console.log('删除房间失败:', JSON.stringify(ret));
                     object.fail && object.fail({
                         errCode: ret.data.code,
@@ -323,12 +341,12 @@ WebListOpt = (function () {
             url: webListDomain + 'get_room_list',
             method: "POST",
             data: {
-                roomType: baseRoomType,
+                roomType: webExeRoomType,
                 index: object.data.index,
                 count: object.data.count
             }, 
             success: function (ret) {
-                if(ret.data.code != 200) {
+                if(ret.data.code != 0) {
                     console.log('获取房间列表失败:', JSON.stringify(ret));
                     object.fail && object.fail({
                         errCode: ret.data.code,
@@ -343,7 +361,7 @@ WebListOpt = (function () {
     }
 
     function unload() {
-        EXEStarter.unload();
+        EXEStartObj.unload();
     }
 
     return {
@@ -354,5 +372,7 @@ WebListOpt = (function () {
         getRoomList: getRoomList,
         setListener: setListener,
         unload: unload,
+
+        webexe_roomtype: webexe_roomtype,
     }
 })()
