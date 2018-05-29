@@ -336,7 +336,7 @@ LiveRoom = (function () {
             return;
         }
 
-        if (!object.userdata.userID || !object.userdata.userSig || !object.userdata.sdkAppID ||
+        if (!object.userdata || !object.userdata.userID || !object.userdata.userSig || !object.userdata.sdkAppID ||
             !object.userdata.accType || !object.roomdata.serverDomain || !object.roomdata.roomID || 
             !object.roomdata.roomAction) {
             console.error("liveroom startEXE参数错误");
@@ -397,16 +397,46 @@ LiveRoom = (function () {
         roomInfo.template = object.roomdata.template;
         arrExeRoom.push(roomInfo);
 
-        custom.userList = (object.custom && object.custom.userList) || true;
-        custom.IMList = (object.custom && object.custom.IMList) || true;
-        custom.whiteboard = (object.custom && object.custom.whiteboard) || true;
-        custom.screenShare = (object.custom && object.custom.screenShare) || true;
-        custom.mixRecord = (object.custom && object.custom.mixRecord) || false;
-        custom.screenRecord = (object.custom && object.custom.screenRecord) || EnumDef.ScreenRecordType.RecordNone;
-        custom.cloudRecordUrl = (object.custom && object.custom.cloudRecordUrl) || "";
-        custom.exeUrl = (object.custom && object.custom.exeUrl) || EnumDef.EXEUrl;
-        custom.ip = (object.custom && object.custom.proxy_ip) || "";
-        custom.port = (object.custom && object.custom.proxy_port) || 0;
+        custom.userList = true;
+        if (object.custom && typeof (object.custom.userList) != "undefined")
+            custom.userList = object.custom.userList;
+
+        custom.IMList = true;
+        if (object.custom && typeof (object.custom.IMList) != "undefined")
+            custom.IMList = object.custom.IMList;
+
+        custom.whiteboard = true;
+        if (object.custom && typeof (object.custom.whiteboard) != "undefined")
+            custom.whiteboard = object.custom.whiteboard;
+
+        custom.screenShare = true;
+        if (object.custom && typeof (object.custom.screenShare) != "undefined")
+            custom.screenShare = object.custom.screenShare;
+
+        custom.mixRecord = true;
+        if (object.custom && typeof (object.custom.mixRecord) != "undefined")
+            custom.mixRecord = object.custom.mixRecord;
+
+        custom.screenRecord = EnumDef.ScreenRecordType.RecordNone;
+        if (object.custom && typeof (object.custom.screenRecord) != "undefined")
+            custom.screenRecord = object.custom.screenRecord;
+
+        custom.cloudRecordUrl = "";
+        if (object.custom && typeof (object.custom.cloudRecordUrl) != "undefined")
+            custom.cloudRecordUrl = object.custom.cloudRecordUrl;
+
+        custom.exeUrl = EnumDef.EXEUrl;
+        if (object.custom && typeof (object.custom.exeUrl) != "undefined")
+            custom.exeUrl = object.custom.exeUrl;
+
+        custom.ip = "";
+        if (object.custom && typeof (object.custom.ip) != "undefined")
+            custom.ip = object.custom.ip;
+
+        custom.port = 0;
+        if (object.custom && typeof (object.custom.port) != "undefined")
+            custom.port = object.custom.port;
+
         if (isTridentKernel() == true) {
             custom.dataChannel = "localHttp";
         }
@@ -876,16 +906,47 @@ RtcRoom = (function () {
         starterReportInfo.str_opt_type = roomInfo.roomAction;
         starterReportInfo.int64_ts_protol = getLocalUTCTime();
 
-        custom.userList = (object.custom && object.custom.userList) || true;
-        custom.IMList = (object.custom && object.custom.IMList) || true;
-        custom.whiteboard = (object.custom && object.custom.whiteboard) || true;
-        custom.screenShare = (object.custom && object.custom.screenShare) || true;
-        custom.mixRecord = (object.custom && object.custom.mixRecord) || false;
-        custom.screenRecord = (object.custom && object.custom.screenRecord) || EnumDef.ScreenRecordType.RecordNone;
-        custom.cloudRecordUrl = (object.custom && object.custom.cloudRecordUrl) || "";
-        custom.exeUrl = (object.custom && object.custom.exeUrl) || EnumDef.EXEUrl;
-        custom.ip = (object.custom && object.custom.proxy_ip) || "";
-        custom.port = (object.custom && object.custom.proxy_port) || 0;
+        custom.userList = true;
+        if (object.custom && typeof (object.custom.userList) != "undefined")
+            custom.userList = object.custom.userList;
+
+        custom.IMList = true;
+        if (object.custom && typeof (object.custom.IMList) != "undefined")
+            custom.IMList = object.custom.IMList;
+
+        custom.whiteboard = true;
+        if (object.custom && typeof (object.custom.whiteboard) != "undefined")
+            custom.whiteboard = object.custom.whiteboard;
+
+        custom.screenShare = true;
+        if (object.custom && typeof (object.custom.screenShare) != "undefined")
+            custom.screenShare = object.custom.screenShare;
+
+        custom.mixRecord = true;
+        if (object.custom && typeof (object.custom.mixRecord) != "undefined")
+            custom.mixRecord = object.custom.mixRecord;
+
+        custom.screenRecord = EnumDef.ScreenRecordType.RecordNone;
+        if (object.custom && typeof (object.custom.screenRecord) != "undefined")
+            custom.screenRecord = object.custom.screenRecord;
+
+        custom.cloudRecordUrl = "";
+        if (object.custom && typeof (object.custom.cloudRecordUrl) != "undefined")
+            custom.cloudRecordUrl = object.custom.cloudRecordUrl;
+
+        custom.exeUrl = EnumDef.EXEUrl;
+        if (object.custom && typeof (object.custom.exeUrl) != "undefined")
+            custom.exeUrl = object.custom.exeUrl;
+
+        custom.ip = "";
+        if (object.custom && typeof (object.custom.ip) != "undefined")
+            custom.ip = object.custom.ip;
+
+        custom.port = 0;
+        if (object.custom && typeof (object.custom.port) != "undefined")
+            custom.port = object.custom.port;
+
+
         if (isTridentKernel() == true) {
             custom.dataChannel = "localHttp";
         }
