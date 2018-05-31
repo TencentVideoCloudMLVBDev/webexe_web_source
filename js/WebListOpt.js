@@ -146,7 +146,7 @@ WebListOpt = (function () {
         roomServerDoMain = object.data.roomServerDoMain;
         webListDomain = object.data.listServerDoMain;
         EXEStartObj = LiveRoom;
-        if (webExeRoomType != 0)
+        if (webExeRoomType != webexe_roomtype.LiveRoom)
             EXEStartObj = RtcRoom;
             
     }
