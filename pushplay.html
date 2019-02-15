@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <meta http-equiv="Content-Type" content="text/html; charset=gb2312"/>
-<TITLE>¶ÔÏó PushPlay ²âÊÔÒ³</TITLE>
+<TITLE>å¯¹è±¡ PushPlay æµ‹è¯•é¡µ</TITLE>
 <style>    
  .div-inline {display:inline}
 </style>
@@ -10,9 +10,9 @@
 <BODY onload="initSDK();" onunload="uninitSDK();">
      <input type=submit value="createSession" onClick="createSession(document.getElementById('PusherUrlTextField').value, document.getElementById('PlayerUrlTextField').value);">
      <input type=submit value="destroySession" onClick="destroySession();">
-     <input type=submit value="»ñÈ¡ÍÆÁ÷µØÖ·" onClick="getNewPushUrl();">
-     <input type=submit value="½ØÍ¼ÍÆÁ÷¶Ë" onClick="snapShotPusher();">
-     <input type=submit value="½ØÍ¼À­Á÷¶Ë" onClick="snapShotPlayer();">
+     <input type=submit value="è·å–æ¨æµåœ°å€" onClick="getNewPushUrl();">
+     <input type=submit value="æˆªå›¾æ¨æµç«¯" onClick="snapShotPusher();">
+     <input type=submit value="æˆªå›¾æ‹‰æµç«¯" onClick="snapShotPlayer();">
      <br></br>
      <input size="90" id="PusherUrlTextField" value=""> push_url
      <br></br>
@@ -44,7 +44,7 @@
                     data: {},
                     method: "GET",
                     success: function (ret) {
-                        var urlPusher = ret.data.url_play_acc;
+                        var urlPusher = ret.data.url_push;
                         var urlPlayer = urlPusher.replace(/livepush/g, "liveplay");
                         document.getElementById('PusherUrlTextField').value = urlPusher;
                         document.getElementById('PlayerUrlTextField').value = urlPlayer;
@@ -68,11 +68,11 @@
 
         function createSession(pushUrl, playUrl) {
             if (pushUrl == "" || isRtmpUrl(pushUrl) == false) {
-                alert("ÇëÊäÈëÕıÈ·À­Á÷url");
+                alert("è¯·è¾“å…¥æ­£ç¡®æ‹‰æµurl");
                 return;
             }
             if (playUrl == "" || isRtmpUrl(playUrl) == false) {
-                alert("ÇëÊäÈëÕıÈ·À­Á÷url");
+                alert("è¯·è¾“å…¥æ­£ç¡®æ‹‰æµurl");
                 return;
             }
 
@@ -81,7 +81,7 @@
                     type: "CustomServiceLive",
                     pushURL: pushUrl,
                     playURL: playUrl,
-                    title: "CSÄ£Ê½Demo",
+                    title: "CSæ¨¡å¼Demo",
                     logoUrl: "http://liteavsdk-1252463788.cosgz.myqcloud.com/windows/Cpp/logo/doubleroom_logo.png",
                 },
                 success: function (ret) {
@@ -89,7 +89,7 @@
                 },
                 fail: function (ret) {
                     if (ret.errCode == -1) {
-                        alert("exeÎ´°²×°");
+                        alert("exeæœªå®‰è£…");
                     }
                 },
             });
@@ -111,7 +111,7 @@
                 data: {},
                 method: "GET",
                 success: function (ret) {
-                    var urlPusher = ret.data.url_play_acc;
+                    var urlPusher = ret.data.url_push;
                     var urlPlayer = urlPusher.replace(/livepush/g, "liveplay");
                     document.getElementById('PusherUrlTextField').value = urlPusher;
                     document.getElementById('PlayerUrlTextField').value = urlPlayer;
